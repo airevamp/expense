@@ -9,7 +9,7 @@ type ClientPrincipal = {
   userRoles?: string[];
   claims?: ClientClaim[];
 };
-type AuthUser = { teamId: string; userId: string };
+type AuthUser = { teamId: string; userId: string; userName?: string };
 
 let cachedUser: AuthUser | null = null;
 let inFlight: Promise<AuthUser | null> | null = null;
@@ -43,13 +43,25 @@ function extractTeamId(principal: ClientPrincipal) {
   return principal.userId || principal.userDetails || null;
 }
 
+function extractUserName(principal: ClientPrincipal) {
+  const nameFromClaim = claimValue(principal, [
+    "name",
+    "preferred_username",
+    "upn",
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+  ]);
+  if (nameFromClaim) return nameFromClaim;
+  return principal.userDetails || principal.userId || null;
+}
+
 function parseAuthResponse(payload: any): AuthUser | null {
   const raw = Array.isArray(payload) ? payload[0] : payload;
   const principal: ClientPrincipal | undefined = raw?.clientPrincipal ?? raw;
   if (!principal?.userId) return null;
   const teamId = extractTeamId(principal);
   if (!teamId) return null;
-  return { teamId, userId: principal.userId };
+  const userName = extractUserName(principal) || undefined;
+  return { teamId, userId: principal.userId, userName };
 }
 
 async function loadUser(): Promise<AuthUser | null> {

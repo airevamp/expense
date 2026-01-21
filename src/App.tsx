@@ -21,7 +21,7 @@ export default function App() {
   const { user, loading: authLoading } = useUser();
   const auth = Boolean(user?.userId);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const navMenuOpen = Boolean(menuAnchorEl);
   const closeNavMenu = React.useCallback(() => {
@@ -75,11 +75,14 @@ export default function App() {
             </Button>
           )}
           {auth && (
-            <div>
+            <>
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                {user?.userName || user?.userId}
+              </Typography>
               <IconButton color="inherit" component={RouterLink} to="/expenses">
                 <AccountCircle />
               </IconButton>
-            </div>
+            </>
           )}
         </Toolbar>
       </AppBar>
