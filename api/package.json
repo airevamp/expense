@@ -8,7 +8,7 @@
     "start": "func start"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@azure/functions": "^4.4.0",

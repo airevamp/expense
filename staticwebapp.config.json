@@ -8,7 +8,11 @@
     { "route": "/api/*", "allowedRoles": ["authenticated"] },
     { "route": "/receipts", "allowedRoles": ["authenticated"] },
     { "route": "/dashboard", "allowedRoles": ["authenticated"] },
-    { "route": "/manifest.webmanifest", "headers": { "Cache-Control": "no-cache" } },
+    {
+      "route": "/manifest.webmanifest",
+      "headers": { "Cache-Control": "no-cache" }
+    },
     { "route": "/sw.js", "headers": { "Cache-Control": "no-cache" } }
-  ]
+  ],
+  "platform": { "apiRuntime": "node:20" }
 }

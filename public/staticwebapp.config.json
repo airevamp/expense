@@ -13,5 +13,6 @@
       "headers": { "Cache-Control": "no-cache" }
     },
     { "route": "/sw.js", "headers": { "Cache-Control": "no-cache" } }
-  ]
+  ],
+  "platform": { "apiRuntime": "node:20" }
 }
