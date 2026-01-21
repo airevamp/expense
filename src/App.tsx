@@ -13,11 +13,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate, useRoutes, Link as RouterLink } from "react-router-dom";
 import { routes } from "./routes";
 import { AccountCircle } from "@mui/icons-material";
+import { useUser } from "./lib/auth";
 
 export default function App() {
   const element = useRoutes(routes);
   const navigate = useNavigate();
-  const [auth, setAuth] = React.useState<boolean>(true);
+  const { user, loading: authLoading } = useUser();
+  const auth = Boolean(user?.userId);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null
   );
@@ -59,6 +61,19 @@ export default function App() {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Rise North Expenses
           </Typography>
+          {!authLoading && !auth && (
+            <Button
+              color="inherit"
+              href="/.auth/login/aad"
+              sx={{
+                textTransform: "none",
+                bgcolor: "rgba(0, 0, 0, 0.35)",
+                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.5)" },
+              }}
+            >
+              Sign in
+            </Button>
+          )}
           {auth && (
             <div>
               <IconButton color="inherit" component={RouterLink} to="/expenses">

@@ -1,0 +1,17 @@
+{
+  "name": "receipt-swa-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.4.0",
+    "@azure/storage-blob": "^12.17.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

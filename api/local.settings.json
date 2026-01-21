@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "STORAGE_ACCOUNT_NAME": "yourstorageacct",
+    "STORAGE_ACCOUNT_KEY": "<dev-key-or-use-azurite>",
+    "CONTAINER_NAME": "receipts",
+    "SAS_EXPIRY_MINUTES": "5"
+  }
+}
