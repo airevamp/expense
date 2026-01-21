@@ -63,6 +63,7 @@ function extractUserName(principal: ClientPrincipal) {
 function parseAuthResponse(payload: any): AuthUser | null {
   const raw = Array.isArray(payload) ? payload[0] : payload;
   const principal: ClientPrincipal | undefined = raw?.clientPrincipal ?? raw;
+  console.log("Auth principal:", principal);
   if (!principal?.userId) return null;
   const teamId = extractTeamId(principal);
   if (!teamId) return null;
@@ -75,7 +76,6 @@ async function loadUser(): Promise<AuthUser | null> {
   if (!inFlight) {
     inFlight = fetch("/.auth/me", { credentials: "include" })
       .then((res) => {
-        console.log("Auth response :", res);
         return res.ok ? res.json() : null;
       })
       .then(parseAuthResponse)
