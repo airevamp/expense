@@ -32,6 +32,10 @@ export default function App() {
     setMenuAnchorEl(event.currentTarget);
   }, []);
 
+  const logout = React.useCallback(() => {
+    window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
+  }, []);
+
   return (
     <>
       <AppBar position="sticky" elevation={0}>
@@ -57,6 +61,14 @@ export default function App() {
             <MenuItem component={RouterLink} to="/receipts">
               Receipts
             </MenuItem>
+            {auth && (
+              <>
+                <MenuItem disabled>
+                  Hello {user?.userName || user?.userId}
+                </MenuItem>
+                <MenuItem onClick={logout}>Sign out</MenuItem>
+              </>
+            )}
           </Menu>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Rise North Expenses
@@ -76,12 +88,12 @@ export default function App() {
           )}
           {auth && (
             <>
-              <Typography variant="body2" sx={{ mr: 1 }}>
-                {user?.userName || user?.userId}
-              </Typography>
               <IconButton color="inherit" component={RouterLink} to="/expenses">
                 <AccountCircle />
               </IconButton>
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                {user?.userName || user?.userId}
+              </Typography>
             </>
           )}
         </Toolbar>
