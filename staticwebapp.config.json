@@ -6,7 +6,6 @@
   "mimeTypes": { ".webmanifest": "application/manifest+json" },
   "routes": [
     { "route": "/api/*", "allowedRoles": ["authenticated"] },
-    { "route": "/receipt", "allowedRoles": ["authenticated"] },
     { "route": "/receipts", "allowedRoles": ["authenticated"] },
     { "route": "/dashboard", "allowedRoles": ["authenticated"] },
     { "route": "/manifest.webmanifest", "headers": { "Cache-Control": "no-cache" } },
