@@ -49,7 +49,6 @@ function extractTeamId(principal: ClientPrincipal) {
 }
 
 function extractUserName(principal: ClientPrincipal) {
-  console.log("Principal claims:", principal.claims);
   const nameFromClaim = claimValue(principal, [
     "name",
     "firstname",
@@ -57,7 +56,6 @@ function extractUserName(principal: ClientPrincipal) {
     "upn",
     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
   ]);
-  console.log("Extracted name from claim:", nameFromClaim);
   if (nameFromClaim) return nameFromClaim;
   return principal.userDetails || principal.userId || null;
 }
@@ -76,7 +74,10 @@ async function loadUser(): Promise<AuthUser | null> {
   if (cachedUser) return cachedUser;
   if (!inFlight) {
     inFlight = fetch("/.auth/me", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        console.log("Auth response :", res);
+        return res.ok ? res.json() : null;
+      })
       .then(parseAuthResponse)
       .catch(() => null)
       .finally(() => {
