@@ -17,7 +17,7 @@ import { useUser } from "./lib/auth";
 
 export default function App() {
   const element = useRoutes(routes);
-  const { user, loading: authLoading } = useUser();
+  const { user, loading: authLoading, login, logout: logoutMsal } = useUser();
   const auth = Boolean(user?.userId);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null,
@@ -44,8 +44,8 @@ export default function App() {
   );
 
   const logout = React.useCallback(() => {
-    window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
-  }, []);
+    logoutMsal();
+  }, [logoutMsal]);
 
   return (
     <>
@@ -69,9 +69,9 @@ export default function App() {
             <MenuItem component={RouterLink} to="/capture">
               Capture
             </MenuItem>
-          <MenuItem component={RouterLink} to="/receipts">
-            Receipts
-          </MenuItem>
+            <MenuItem component={RouterLink} to="/receipts">
+              Receipts
+            </MenuItem>
           </Menu>
           <Menu
             id="account-menu"
@@ -93,7 +93,7 @@ export default function App() {
           {!authLoading && !auth && (
             <Button
               color="inherit"
-              href="/.auth/login/aad"
+              onClick={login}
               sx={{
                 textTransform: "none",
                 bgcolor: "rgba(0, 0, 0, 0.35)",
