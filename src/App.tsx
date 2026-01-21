@@ -10,27 +10,38 @@ import {
   MenuItem,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useNavigate, useRoutes, Link as RouterLink } from "react-router-dom";
+import { useRoutes, Link as RouterLink } from "react-router-dom";
 import { routes } from "./routes";
 import { AccountCircle } from "@mui/icons-material";
 import { useUser } from "./lib/auth";
 
 export default function App() {
   const element = useRoutes(routes);
-  const navigate = useNavigate();
   const { user, loading: authLoading } = useUser();
   const auth = Boolean(user?.userId);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null,
   );
+  const [accountAnchorEl, setAccountAnchorEl] =
+    React.useState<null | HTMLElement>(null);
   const navMenuOpen = Boolean(menuAnchorEl);
+  const accountMenuOpen = Boolean(accountAnchorEl);
   const closeNavMenu = React.useCallback(() => {
     setMenuAnchorEl(null);
+  }, []);
+  const closeAccountMenu = React.useCallback(() => {
+    setAccountAnchorEl(null);
   }, []);
 
   const openMenu = React.useCallback((event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
+  const openAccountMenu = React.useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      setAccountAnchorEl(event.currentTarget);
+    },
+    [],
+  );
 
   const logout = React.useCallback(() => {
     window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
@@ -58,17 +69,23 @@ export default function App() {
             <MenuItem component={RouterLink} to="/capture">
               Capture
             </MenuItem>
-            <MenuItem component={RouterLink} to="/receipts">
-              Receipts
+          <MenuItem component={RouterLink} to="/receipts">
+            Receipts
+          </MenuItem>
+          </Menu>
+          <Menu
+            id="account-menu"
+            anchorEl={accountAnchorEl}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            keepMounted
+            open={accountMenuOpen}
+            onClose={closeAccountMenu}
+            onClick={closeAccountMenu}
+          >
+            <MenuItem component={RouterLink} to="/profile">
+              Profile
             </MenuItem>
-            {auth && (
-              <>
-                <MenuItem disabled>
-                  Hello {user?.userName || user?.userId}
-                </MenuItem>
-                <MenuItem onClick={logout}>Sign out</MenuItem>
-              </>
-            )}
+            <MenuItem onClick={logout}>Logout</MenuItem>
           </Menu>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Rise North Expenses
@@ -88,11 +105,11 @@ export default function App() {
           )}
           {auth && (
             <>
-              <IconButton color="inherit" component={RouterLink} to="/expenses">
+              <IconButton color="inherit" onClick={openAccountMenu}>
                 <AccountCircle />
               </IconButton>
               <Typography variant="body2" sx={{ mr: 1 }}>
-                {user?.userName || user?.userId}
+                Hello {user?.userName || user?.userId}
               </Typography>
             </>
           )}
