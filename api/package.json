@@ -7,6 +7,9 @@
     "build": "tsc -p .",
     "start": "func start"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@azure/functions": "^4.4.0",
     "@azure/storage-blob": "^12.17.0"
