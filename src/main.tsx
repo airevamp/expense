@@ -22,20 +22,15 @@ const msalInstance = new PublicClientApplication({
     cacheLocation: "localStorage",
     storeAuthStateInCookie: false,
   },
-  system: {
-    loggerOptions: {
-      loggerCallback: (level, message, containsPii) => {
-        if (!containsPii) console.log("[MSAL]", message);
-      },
-      logLevel: LogLevel.Verbose,
-    },
-  },
 });
 
 const rootEl = document.getElementById("root")!;
 
 (async () => {
   await msalInstance.initialize();
+
+  const result = await msalInstance.handleRedirectPromise();
+  console.log("Redirect result:", result);
 
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length > 0) {
@@ -57,6 +52,6 @@ const rootEl = document.getElementById("root")!;
 // Register a tiny service worker for offline shell
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/src/sw.js").catch(console.error);
+    navigator.serviceWorker.register("/sw.js").catch(console.error);
   });
 }
