@@ -3,7 +3,11 @@ import { createRoot } from "react-dom/client";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
-import { EventType, PublicClientApplication } from "@azure/msal-browser";
+import {
+  EventType,
+  LogLevel,
+  PublicClientApplication,
+} from "@azure/msal-browser";
 import App from "./App";
 import theme from "./theme";
 
@@ -17,6 +21,14 @@ const msalInstance = new PublicClientApplication({
   cache: {
     cacheLocation: "localStorage",
     storeAuthStateInCookie: false,
+  },
+  system: {
+    loggerOptions: {
+      loggerCallback: (level, message, containsPii) => {
+        if (!containsPii) console.log("[MSAL]", message);
+      },
+      logLevel: LogLevel.Verbose,
+    },
   },
 });
 
