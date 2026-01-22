@@ -23,24 +23,14 @@ const msalInstance = new PublicClientApplication({
 const rootEl = document.getElementById("root")!;
 
 (async () => {
-  // You can do some async initialization here if needed
   await msalInstance.initialize();
-  msalInstance.addEventCallback((event) => {
-    if (
-      event.eventType === EventType.LOGIN_SUCCESS &&
-      event.payload &&
-      "account" in event.payload
-    ) {
-      // @ts-expect-error payload typing varies
-      msalInstance.setActiveAccount(event.payload.account);
-    }
-  });
+
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length > 0) {
     msalInstance.setActiveAccount(accounts[0]);
   }
 
-  createRoot(rootEl).render(
+  createRoot(document.getElementById("root")!).render(
     <MsalProvider instance={msalInstance}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -53,8 +43,8 @@ const rootEl = document.getElementById("root")!;
 })();
 
 // Register a tiny service worker for offline shell
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker.register("/src/sw.js").catch(console.error);
-//   });
-// }
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/src/sw.js").catch(console.error);
+  });
+}
