@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -14,6 +14,7 @@ import { useRoutes, Link as RouterLink } from "react-router-dom";
 import { routes } from "./routes";
 import { AccountCircle } from "@mui/icons-material";
 import { useUser } from "./lib/auth";
+import { useMsal } from "@azure/msal-react";
 
 export default function App() {
   const element = useRoutes(routes);
@@ -22,6 +23,8 @@ export default function App() {
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null,
   );
+  const { accounts, inProgress } = useMsal();
+
   const [accountAnchorEl, setAccountAnchorEl] =
     React.useState<null | HTMLElement>(null);
   const navMenuOpen = Boolean(menuAnchorEl);

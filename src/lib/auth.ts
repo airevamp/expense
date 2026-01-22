@@ -3,7 +3,6 @@ import { useMsal } from "@azure/msal-react";
 import type { AccountInfo } from "@azure/msal-browser";
 
 type AuthUser = {
-  teamId: string;
   userId: string;
   userName?: string;
   tenantId?: string;
@@ -29,7 +28,6 @@ export function useUser() {
     const objectId: string | undefined = claims.oid;
 
     setUser({
-      teamId: tenantId ?? account.homeAccountId,
       userId: objectId ?? account.homeAccountId,
       userName: claims.name ?? claims.preferred_username ?? account.username,
       tenantId,

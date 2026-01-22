@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
-import { PublicClientApplication } from "@azure/msal-browser";
+import { EventType, PublicClientApplication } from "@azure/msal-browser";
 import App from "./App";
 import theme from "./theme";
 
@@ -11,7 +11,8 @@ const msalInstance = new PublicClientApplication({
   auth: {
     clientId: import.meta.env.VITE_ENTRA_CLIENT_ID,
     authority: import.meta.env.VITE_ENTRA_AUTHORITY,
-    redirectUri: window.location.origin,
+    redirectUri: `${window.location.origin}/`,
+    postLogoutRedirectUri: `${window.location.origin}/capture`,
   },
   cache: {
     cacheLocation: "localStorage",
@@ -20,8 +21,26 @@ const msalInstance = new PublicClientApplication({
 });
 
 const rootEl = document.getElementById("root")!;
-createRoot(rootEl).render(
-  <React.StrictMode>
+
+(async () => {
+  // You can do some async initialization here if needed
+  await msalInstance.initialize();
+  msalInstance.addEventCallback((event) => {
+    if (
+      event.eventType === EventType.LOGIN_SUCCESS &&
+      event.payload &&
+      "account" in event.payload
+    ) {
+      // @ts-expect-error payload typing varies
+      msalInstance.setActiveAccount(event.payload.account);
+    }
+  });
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    msalInstance.setActiveAccount(accounts[0]);
+  }
+
+  createRoot(rootEl).render(
     <MsalProvider instance={msalInstance}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -29,13 +48,13 @@ createRoot(rootEl).render(
           <App />
         </BrowserRouter>
       </ThemeProvider>
-    </MsalProvider>
-  </React.StrictMode>,
-);
+    </MsalProvider>,
+  );
+})();
 
 // Register a tiny service worker for offline shell
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/src/sw.js").catch(console.error);
-  });
-}
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker.register("/src/sw.js").catch(console.error);
+//   });
+// }
