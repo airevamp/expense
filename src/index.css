@@ -22,11 +22,17 @@
   z-index: 99999;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
+  transition: opacity 180ms ease;
 }
 
 /* Only show splash when launched as installed PWA */
 html.pwa #boot-splash {
   display: grid;
+}
+
+#boot-splash .boot-logo {
+  width: 96px;
+  height: 96px;
 }
 
 .boot-logo {
