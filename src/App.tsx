@@ -46,12 +46,27 @@ export default function App() {
   );
 
   useEffect(() => {
-    // wait 1 frame so React paints once, then fade the splash
+    const isPwa =
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      (window.navigator as any)?.standalone === true;
+
+    if (!isPwa) return;
+
+    const MIN_DURATION = 800; // ms (try 600–1000)
+
+    const start = performance.now();
+
     requestAnimationFrame(() => {
       const el = document.getElementById("boot-splash");
       if (!el) return;
-      el.classList.add("hide");
-      setTimeout(() => el.remove(), 260);
+
+      const elapsed = performance.now() - start;
+      const remaining = Math.max(0, MIN_DURATION - elapsed);
+
+      setTimeout(() => {
+        el.classList.add("hide");
+        setTimeout(() => el.remove(), 260);
+      }, remaining);
     });
   }, []);
 

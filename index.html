@@ -6,25 +6,41 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#f8dd2b" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon-192.png" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <meta name="theme-color" content="#f8dd2bee" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/icons/icon-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Receipts" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
     <title>Expensify</title>
   </head>
   <body>
-    <div id="boot-splash" aria-label="Loading">
-      <img class="boot-logo" src="icons/icon-192.png" alt="Rise North" />
-    </div>
+    <script>
+      (function () {
+        var isStandalone =
+          (window.matchMedia &&
+            window.matchMedia("(display-mode: standalone)").matches) ||
+          (window.navigator && window.navigator.standalone === true);
+
+        document.documentElement.classList.add(isStandalone ? "pwa" : "web");
+
+        // Only create splash in PWA
+        if (isStandalone) {
+          var splash = document.createElement("div");
+          splash.id = "boot-splash";
+          splash.setAttribute("aria-label", "Loading");
+          splash.innerHTML =
+            '<img class="boot-logo" src="/icons/icon-192.png" alt="Rise North" />';
+          document.body.appendChild(splash);
+        }
+      })();
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

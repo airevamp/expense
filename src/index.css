@@ -14,20 +14,28 @@
   -moz-osx-font-smoothing: grayscale;
 }
 #boot-splash {
+  display: none; /* <-- add this */
   position: fixed;
   inset: 0;
   background: var(--splashBg);
-  display: grid;
   place-items: center;
   z-index: 99999;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* Only show splash when launched as installed PWA */
+html.pwa #boot-splash {
+  display: grid;
+}
+
 .boot-logo {
   width: 140px;
   height: 140px;
   object-fit: contain;
   animation:
-    splash-pop 650ms ease-out both,
-    splash-float 1400ms ease-in-out 650ms infinite;
+    splash-pop 600ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    splash-float 1400ms ease-in-out 600ms infinite;
   transform: translateZ(0);
 }
 
