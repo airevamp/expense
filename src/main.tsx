@@ -3,11 +3,7 @@ import { createRoot } from "react-dom/client";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
-import {
-  EventType,
-  LogLevel,
-  PublicClientApplication,
-} from "@azure/msal-browser";
+import { PublicClientApplication } from "@azure/msal-browser";
 import App from "./App";
 import theme from "./theme";
 
@@ -19,21 +15,25 @@ const msalInstance = new PublicClientApplication({
     postLogoutRedirectUri: `${window.location.origin}/capture`,
   },
   cache: {
-    cacheLocation: "localStorage",
+    cacheLocation: "sessionStorage",
     storeAuthStateInCookie: false,
   },
 });
 
-const rootEl = document.getElementById("root")!;
-
 (async () => {
   await msalInstance.initialize();
 
-  const result = await msalInstance.handleRedirectPromise();
-  console.log("Redirect result:", result);
+  try {
+    const result = await msalInstance.handleRedirectPromise();
+    if (result?.account) {
+      msalInstance.setActiveAccount(result.account);
+    }
+  } catch (error) {
+    console.error("MSAL redirect handling failed:", error);
+  }
 
   const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
+  if (accounts.length > 0 && !msalInstance.getActiveAccount()) {
     msalInstance.setActiveAccount(accounts[0]);
   }
 

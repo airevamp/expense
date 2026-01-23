@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
-  palette: { mode: "light", primary: { main: "#1976d2" } },
+  palette: { mode: "light", primary: { main: "#f8dd2bee" } },
   shape: { borderRadius: 16 },
   components: {
     MuiButton: {

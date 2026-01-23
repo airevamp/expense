@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { Box, CircularProgress } from "@mui/material";
@@ -11,7 +11,7 @@ export default function RequireAuth({ children }: Prop) {
 
   const msalIsBusy = inProgress !== InteractionStatus.None;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (msalIsBusy || isAuthenticated) return;
 
     // ✅ If MSAL already has an account in cache, use it (don’t re-login)

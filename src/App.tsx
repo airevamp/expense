@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import {
   AppBar,
   Toolbar,
@@ -8,13 +8,13 @@ import {
   Button,
   Menu,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useRoutes, Link as RouterLink } from "react-router-dom";
 import { routes } from "./routes";
 import { AccountCircle } from "@mui/icons-material";
 import { useUser } from "./lib/auth";
-import { useMsal } from "@azure/msal-react";
 
 export default function App() {
   const element = useRoutes(routes);
@@ -23,7 +23,6 @@ export default function App() {
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null,
   );
-  const { accounts, inProgress } = useMsal();
 
   const [accountAnchorEl, setAccountAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -91,7 +90,7 @@ export default function App() {
             <MenuItem onClick={logout}>Logout</MenuItem>
           </Menu>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Rise North Expenses
+            Expenses
           </Typography>
           {!authLoading && !auth && (
             <Button
@@ -119,7 +118,7 @@ export default function App() {
         </Toolbar>
       </AppBar>
       <Container maxWidth="sm" sx={{ py: 2 }}>
-        <Suspense fallback={<div>Loading…</div>}>{element}</Suspense>
+        <Suspense fallback={<CircularProgress />}>{element}</Suspense>
       </Container>
     </>
   );
