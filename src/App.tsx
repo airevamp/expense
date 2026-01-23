@@ -77,7 +77,12 @@ export default function App() {
   return (
     <>
       <AppBar position="sticky" elevation={0}>
-        <Toolbar>
+        <Toolbar
+          sx={{
+            pt: "env(safe-area-inset-top)",
+            minHeight: `calc(56px + env(safe-area-inset-top))`,
+          }}
+        >
           <IconButton edge="start" color="inherit" onClick={openMenu}>
             <MenuIcon />
           </IconButton>
