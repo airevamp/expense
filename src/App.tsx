@@ -60,11 +60,28 @@ export default function App() {
       const splash = document.getElementById("boot-splash");
       if (!splash) return;
 
-      splash.style.willChange = "opacity, transform";
-      splash.style.transformOrigin = "center";
-      splash.style.transition = `opacity ${FADE_DURATION}ms ease, transform ${FADE_DURATION}ms ease`;
+      const logo = splash.querySelector(".boot-logo") as HTMLElement | null;
+
+      // Fade the background overlay
+      splash.style.willChange = "opacity";
+      splash.style.transition = `opacity ${FADE_DURATION}ms ease`;
       splash.style.opacity = "0";
-      splash.style.transform = "scale(1.06)";
+
+      // Scale + fade the logo (this is what your eyes track)
+      if (logo) {
+        // ensure a known starting point
+        logo.style.willChange = "transform, opacity";
+        logo.style.transformOrigin = "center";
+        logo.style.transform = "scale(1)";
+        logo.style.opacity = "1";
+        logo.style.transition = `transform ${FADE_DURATION}ms ease, opacity ${FADE_DURATION}ms ease`;
+
+        // animate on next frame
+        requestAnimationFrame(() => {
+          logo.style.transform = "scale(1.14)";
+          logo.style.opacity = "0";
+        });
+      }
 
       setTimeout(() => {
         splash.remove();
@@ -73,7 +90,7 @@ export default function App() {
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
         document.body.style.height = "";
-      }, FADE_DURATION + 50);
+      }, FADE_DURATION + 80);
     };
 
     const elapsed = performance.now() - startTime;
