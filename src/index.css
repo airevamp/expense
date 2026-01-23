@@ -6,18 +6,64 @@
   color-scheme: light;
   color: rgba(255, 255, 255, 0.87);
   background-color: transparent;
+  --splashBg: #f8dd2b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+#boot-splash {
+  position: fixed;
+  inset: 0;
+  background: var(--splashBg);
+  display: grid;
+  place-items: center;
+  z-index: 99999;
+}
+.boot-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  animation:
+    splash-pop 650ms ease-out both,
+    splash-float 1400ms ease-in-out 650ms infinite;
+  transform: translateZ(0);
+}
+
+@keyframes splash-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes splash-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+#boot-splash.hide {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
-  background: #f8dd2b; /* solid yellow (no ee alpha) */
+  background: var(--splashBg);
 }
 a {
   font-weight: 500;
@@ -59,10 +105,6 @@ button:focus-visible {
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
   a:hover {
     color: #747bff;
   }

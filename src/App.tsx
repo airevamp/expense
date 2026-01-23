@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -44,6 +44,16 @@ export default function App() {
     },
     [],
   );
+
+  useEffect(() => {
+    // wait 1 frame so React paints once, then fade the splash
+    requestAnimationFrame(() => {
+      const el = document.getElementById("boot-splash");
+      if (!el) return;
+      el.classList.add("hide");
+      setTimeout(() => el.remove(), 260);
+    });
+  }, []);
 
   const logout = React.useCallback(() => {
     logoutMsal();
