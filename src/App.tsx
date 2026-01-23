@@ -61,32 +61,36 @@ export default function App() {
       if (!splash) return;
 
       const logo = splash.querySelector(".boot-logo") as HTMLElement | null;
-
-      // Fade the background overlay
-      splash.style.willChange = "opacity";
-      splash.style.transition = `opacity ${FADE_DURATION}ms ease`;
-      splash.style.opacity = "0";
-
-      // Scale + fade the logo (this is what your eyes track)
-      if (logo) {
-        // ensure a known starting point
-        logo.style.willChange = "transform, opacity";
-        logo.style.transformOrigin = "center";
-        logo.style.transform = "scale(1)";
-        logo.style.opacity = "1";
-        logo.style.transition = `transform ${FADE_DURATION}ms ease, opacity ${FADE_DURATION}ms ease`;
-
-        // animate on next frame
-        requestAnimationFrame(() => {
-          logo.style.transform = "scale(1.14)";
-          logo.style.opacity = "0";
-        });
+      if (!logo) {
+        splash.remove();
+        return;
       }
 
+      // Keep the background visible (don’t fade splash yet)
+      splash.style.opacity = "1";
+
+      // Prep logo animation
+      logo.style.willChange = "transform, opacity";
+      logo.style.transformOrigin = "center";
+      logo.style.transition = `transform ${FADE_DURATION}ms ease, opacity ${FADE_DURATION}ms ease`;
+
+      // Ensure a real start state
+      logo.style.transform = "scale(1)";
+      logo.style.opacity = "1";
+
+      // Force reflow (iOS sometimes needs this for transforms to animate)
+      void logo.getBoundingClientRect();
+
+      // Animate next frame
+      requestAnimationFrame(() => {
+        logo.style.transform = "scale(1.18)";
+        logo.style.opacity = "0";
+      });
+
+      // Remove splash after animation finishes
       setTimeout(() => {
         splash.remove();
 
-        // restore page scrolling
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
         document.body.style.height = "";
