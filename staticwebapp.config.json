@@ -6,6 +6,18 @@
   "mimeTypes": { ".webmanifest": "application/manifest+json" },
   "routes": [
     {
+      "route": "/index.html",
+      "headers": {
+        "Cache-Control": "no-store"
+      }
+    },
+    {
+      "route": "/assets/*",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
       "route": "/manifest.webmanifest",
       "headers": { "Cache-Control": "no-cache" }
     },
