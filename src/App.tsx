@@ -59,7 +59,7 @@ export default function App() {
     requestAnimationFrame(() => {
       const splash = document.getElementById("boot-splash");
       if (splash) {
-        splash.style.transition = "opacity 200ms ease";
+        splash.style.transition = "opacity 1000ms ease";
         splash.style.opacity = "0";
 
         setTimeout(() => {
@@ -69,7 +69,7 @@ export default function App() {
           document.documentElement.style.overflow = "";
           document.body.style.overflow = "";
           document.body.style.height = "";
-        }, 220);
+        }, 1220);
       }
     });
   }, []);
