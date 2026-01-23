@@ -57,16 +57,20 @@ export default function App() {
     const start = performance.now();
 
     requestAnimationFrame(() => {
-      const el = document.getElementById("boot-splash");
-      if (!el) return;
+      const splash = document.getElementById("boot-splash");
+      if (splash) {
+        splash.style.transition = "opacity 200ms ease";
+        splash.style.opacity = "0";
 
-      const elapsed = performance.now() - start;
-      const remaining = Math.max(0, MIN_DURATION - elapsed);
+        setTimeout(() => {
+          splash.remove();
 
-      setTimeout(() => {
-        el.classList.add("hide");
-        setTimeout(() => el.remove(), 260);
-      }, remaining);
+          // restore page scrolling
+          document.documentElement.style.overflow = "";
+          document.body.style.overflow = "";
+          document.body.style.height = "";
+        }, 220);
+      }
     });
   }, []);
 

@@ -26,15 +26,35 @@
 
         document.documentElement.classList.add(isStandalone ? "pwa" : "web");
 
-        // Only create splash in PWA
-        if (isStandalone) {
-          var splash = document.createElement("div");
-          splash.id = "boot-splash";
-          splash.setAttribute("aria-label", "Loading");
-          splash.innerHTML =
-            '<img class="boot-logo" src="/icons/icon-192.png" alt="Rise North" />';
-          document.body.appendChild(splash);
-        }
+        if (!isStandalone) return;
+
+        // ✅ guard
+        if (document.getElementById("boot-splash")) return;
+
+        // ✅ lock layout so nothing scrolls/jumps
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+        document.body.style.height = "100%";
+
+        var splash = document.createElement("div");
+        splash.id = "boot-splash";
+
+        // ✅ CRITICAL: make it an overlay BEFORE any CSS loads
+        splash.style.cssText = [
+          "position:fixed",
+          "inset:0",
+          "z-index:2147483647",
+          "display:grid",
+          "place-items:center",
+          "background:#f8dd2b",
+          "padding-top:env(safe-area-inset-top)",
+          "padding-bottom:env(safe-area-inset-bottom)",
+        ].join(";");
+
+        splash.innerHTML =
+          '<img class="boot-logo" src="/icons/icon-192.png" alt="Rise North" />';
+
+        document.body.appendChild(splash);
       })();
     </script>
 
