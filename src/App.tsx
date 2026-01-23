@@ -52,29 +52,36 @@ export default function App() {
 
     if (!isPwa) return;
 
-    const MIN_DURATION = 800; // ms (try 600–1000)
+    const MIN_VISIBLE_TIME = 2000;
+    const FADE_DURATION = 900;
+    const startTime = performance.now();
 
-    const start = performance.now();
-
-    requestAnimationFrame(() => {
+    const removeSplash = () => {
       const splash = document.getElementById("boot-splash");
-      if (splash) {
-        splash.style.willChange = "opacity, transform";
-        splash.style.transformOrigin = "center";
-        splash.style.transition = "opacity 900ms ease, transform 900ms ease";
-        splash.style.opacity = "0";
-        splash.style.transform = "scale(1.06)";
+      if (!splash) return;
 
-        setTimeout(() => {
-          splash.remove();
+      splash.style.willChange = "opacity, transform";
+      splash.style.transformOrigin = "center";
+      splash.style.transition = `opacity ${FADE_DURATION}ms ease, transform ${FADE_DURATION}ms ease`;
+      splash.style.opacity = "0";
+      splash.style.transform = "scale(1.06)";
 
-          // restore page scrolling
-          document.documentElement.style.overflow = "";
-          document.body.style.overflow = "";
-          document.body.style.height = "";
-        }, 950);
-      }
-    });
+      setTimeout(() => {
+        splash.remove();
+
+        // restore page scrolling
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+        document.body.style.height = "";
+      }, FADE_DURATION + 50);
+    };
+
+    const elapsed = performance.now() - startTime;
+    const remaining = Math.max(0, MIN_VISIBLE_TIME - elapsed);
+
+    setTimeout(() => {
+      requestAnimationFrame(removeSplash);
+    }, remaining);
   }, []);
 
   const logout = React.useCallback(() => {
