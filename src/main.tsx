@@ -51,7 +51,32 @@ const msalInstance = new PublicClientApplication({
 
 // Register a tiny service worker for offline shell
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(console.error);
+  window.addEventListener("load", async () => {
+    const reg = await navigator.serviceWorker.register("/sw.js");
+
+    // Reload when the new SW takes control
+    let reloading = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+
+    // If there's an update waiting already, activate it
+    if (reg.waiting) {
+      reg.waiting.postMessage({ type: "SKIP_WAITING" });
+    }
+
+    // When a new SW is found, wait until it becomes "installed" then activate it
+    reg.addEventListener("updatefound", () => {
+      const sw = reg.installing;
+      if (!sw) return;
+
+      sw.addEventListener("statechange", () => {
+        if (sw.state === "installed" && navigator.serviceWorker.controller) {
+          reg.waiting?.postMessage({ type: "SKIP_WAITING" });
+        }
+      });
+    });
   });
 }
