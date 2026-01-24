@@ -15,12 +15,7 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import UploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import {
-  buildBlobName,
-  compressIfPossible,
-  ymd,
-  toISO,
-} from "../lib/api";
+import { buildBlobName, compressIfPossible, ymd, toISO } from "../lib/api";
 
 export default function CaptureCard() {
   const [file, setFile] = useState<File | null>(null);
@@ -111,9 +106,7 @@ export default function CaptureCard() {
             ) : (
               <>
                 <PhotoCameraIcon fontSize="large" />
-                <Typography variant="body2">
-                  iPhone-friendly: opens the camera
-                </Typography>
+                <Typography variant="body2">Opens the camera</Typography>
               </>
             )}
             <Button
