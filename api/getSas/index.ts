@@ -4,7 +4,7 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
-import { buildBlobSasUrl } from "../shared/storage.js";
+// import { buildBlobSasUrl } from "../shared/storage.js";
 
 type CallerIdentity = {
   teamId?: string;
@@ -53,14 +53,13 @@ function getCallerIdentity(req: HttpRequest): CallerIdentity | null {
       claims?: Array<{ typ?: string; val?: string }>;
     };
     const claims = Array.isArray(data.claims) ? data.claims : [];
-    const claimValue = (typ: string) =>
-      claims.find((c) => c.typ === typ)?.val;
+    const claimValue = (typ: string) => claims.find((c) => c.typ === typ)?.val;
     return {
       userId:
         data.userId ??
         claimValue("oid") ??
         claimValue(
-          "http://schemas.microsoft.com/identity/claims/objectidentifier"
+          "http://schemas.microsoft.com/identity/claims/objectidentifier",
         ),
       teamId:
         data.tenantId ??
@@ -74,7 +73,7 @@ function getCallerIdentity(req: HttpRequest): CallerIdentity | null {
 
 export async function sasHandler(
   req: HttpRequest,
-  ctx: InvocationContext
+  ctx: InvocationContext,
 ): Promise<HttpResponseInit> {
   try {
     const body = (await req.json()) as {
@@ -111,14 +110,15 @@ export async function sasHandler(
       };
     }
 
-    const sas = buildBlobSasUrl({
-      account,
-      accountKey,
-      container,
-      blobName,
-      contentType,
-      expiryMinutes: expiry,
-    });
+    // const sas = buildBlobSasUrl({
+    //   account,
+    //   accountKey,
+    //   container,
+    //   blobName,
+    //   contentType,
+    //   expiryMinutes: expiry,
+    // });
+    const sas = {};
     return { status: 200, jsonBody: sas };
   } catch (err: any) {
     ctx.error("sas error", err);
