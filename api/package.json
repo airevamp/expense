@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . && cpy \"host.json\" dist/ && cpy \"**/function.json\" dist/ --parents",
     "start": "func start"
   },
   "engines": {
@@ -15,6 +15,7 @@
     "@azure/storage-blob": "^12.17.0"
   },
   "devDependencies": {
+    "cpy-cli": "^6.0.0",
     "typescript": "^5.4.5"
   }
 }
