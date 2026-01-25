@@ -4,7 +4,7 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
-// import { buildBlobSasUrl } from "../shared/storage.js";
+import { buildBlobSasUrl } from "../shared/storage.js";
 
 type CallerIdentity = {
   teamId?: string;
@@ -110,15 +110,14 @@ export async function sasHandler(
       };
     }
 
-    // const sas = buildBlobSasUrl({
-    //   account,
-    //   accountKey,
-    //   container,
-    //   blobName,
-    //   contentType,
-    //   expiryMinutes: expiry,
-    // });
-    const sas = {};
+    const sas = buildBlobSasUrl({
+      account,
+      accountKey,
+      container,
+      blobName,
+      contentType,
+      expiryMinutes: expiry,
+    });
     return { status: 200, jsonBody: sas };
   } catch (err: any) {
     ctx.error("sas error", err);
