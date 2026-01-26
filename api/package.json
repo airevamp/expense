@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc -p . && mv dist/index.js dist/index.js && cpy \"host.json\" dist/ && cpy \"package.json\" dist/ && cpy \"./shared/*.js\" dist/shared/",
+    "build": "tsc -p . && cpy \"host.json\" dist/ && cpy \"package.json\" dist/ && cpy \"./shared/*.js\" dist/shared/",
     "start": "func start"
   },
   "engines": {
