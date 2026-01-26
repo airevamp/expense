@@ -4,7 +4,7 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
-import { buildBlobSasUrl } from "../shared/storage.js";
+import { buildBlobSasUrl } from "./shared/storage.js";
 
 type CallerIdentity = {
   teamId?: string;
