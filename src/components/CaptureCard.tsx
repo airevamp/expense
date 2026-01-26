@@ -15,7 +15,14 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import UploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { buildBlobName, compressIfPossible, ymd, toISO } from "../lib/api";
+import {
+  buildBlobName,
+  compressIfPossible,
+  getSasUrl,
+  setBlobTags,
+  ymd,
+  toISO,
+} from "../lib/api";
 
 export default function CaptureCard() {
   const [file, setFile] = useState<File | null>(null);
@@ -64,20 +71,28 @@ export default function CaptureCard() {
         now,
       });
 
-      const metadata = {
-        captureTs: toISO(now),
-        uploadedBy: userId,
-        device: navigator.userAgent,
-        appVersion: "web-1",
-        ocrStatus: "pending",
-        notes: notes.slice(0, 200),
-      };
       const tags = { teamId, userId, year: String(y), month: String(m) };
 
-      // Blob storage upload is intentionally disabled in this phase.
-      // TODO: Re-enable SAS + upload + tagging once storage integration is ready.
+      const sas = await getSasUrl(blobName, prepared.type, {
+        "x-team-id": teamId,
+        "x-user-id": userId,
+      });
+      setState("uploading");
+      const uploadRes = await fetch(sas.uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": prepared.type,
+          "x-ms-blob-type": "BlockBlob",
+        },
+        body: prepared,
+      });
+      if (!uploadRes.ok) {
+        throw new Error(`Upload failed: ${uploadRes.status}`);
+      }
+      setState("tagging");
+      await setBlobTags(sas.uploadUrl, tags);
       setState("done");
-      setMessage("Upload disabled for this phase.");
+      setMessage(sas.blobUrl);
     } catch (e: any) {
       setState("error");
       setMessage(e?.message ?? "Upload error");

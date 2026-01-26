@@ -1,10 +1,19 @@
 export async function getSasUrl(
   blobName: string,
-  contentType: string
+  contentType: string,
+  extraHeaders?: Record<string, string>
 ): Promise<{ uploadUrl: string; blobUrl: string }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (extraHeaders) {
+    for (const [k, v] of Object.entries(extraHeaders)) {
+      if (v) headers[k] = v;
+    }
+  }
   const res = await fetch("/api/sas", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({ blobName, contentType }),
   });
   if (!res.ok) throw new Error(`SAS request failed: ${res.status}`);
