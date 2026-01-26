@@ -21,23 +21,6 @@ jobs:
           submodules: true
           lfs: false
 
-      # Build the API ourselves so we can list dist/ contents reliably
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Build API (api/dist)
-        run: |
-          cd api
-          npm ci
-          npm run build
-
-      - name: List API build output
-        run: |
-          echo "==== API dist contents ===="
-          find api/dist -type f
-
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -54,8 +37,7 @@ jobs:
           output_location: "dist" # Frontend build output (Vite)
 
           # API build config
-          api_location: "api/dist" # Deploy the built Functions app
-          skip_api_build: true # We already built it above
+          api_location: "api" # Deploy the built Functions app
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
