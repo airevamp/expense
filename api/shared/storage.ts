@@ -33,8 +33,10 @@ export function buildBlobSasUrl(params: {
     new StorageSharedKeyCredential(account, accountKey)
   ).toString();
 
-  const base = `https://${account}.blob.core.windows.net/${container}/${encodeURI(
-    blobName
-  )}`;
+  const encodedPath = blobName
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  const base = `https://${account}.blob.core.windows.net/${container}/${encodedPath}`;
   return { uploadUrl: `${base}?${sas}`, blobUrl: base };
 }
