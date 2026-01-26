@@ -15,7 +15,7 @@ export function buildBlobSasUrl(params: {
 }) {
   const { account, accountKey, container, blobName, contentType } = params;
   const expiresOn = new Date(
-    Date.now() + (params.expiryMinutes ?? 5) * 60 * 1000
+    Date.now() + (params.expiryMinutes ?? 5) * 60 * 1000,
   );
   const startsOn = new Date(Date.now() - 60 * 1000); // 1 minute clock skew
 
@@ -30,9 +30,10 @@ export function buildBlobSasUrl(params: {
       contentType,
       protocol: SASProtocol.Https,
     },
-    new StorageSharedKeyCredential(account, accountKey)
+    new StorageSharedKeyCredential(account, accountKey),
   ).toString();
 
+  console.log("container", container, "blobName", blobName);
   const encodedPath = blobName
     .split("/")
     .map((segment) => encodeURIComponent(segment))

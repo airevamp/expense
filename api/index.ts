@@ -101,13 +101,12 @@ export async function sasHandler(
     const account = process.env["STORAGE_ACCOUNT_NAME"]!;
     const accountKey = process.env["STORAGE_ACCOUNT_KEY"]!;
     const container = process.env["CONTAINER_NAME"] || "receipts";
-    console.log("container name", container);
     const expiry = Number(process.env["SAS_EXPIRY_MINUTES"] || "5");
 
-    if (!account || !accountKey) {
+    if (!account || !accountKey || !container) {
       return {
         status: 500,
-        jsonBody: { error: "Storage credentials not configured" },
+        jsonBody: { error: "Storage credentials or container not configured" },
       };
     }
 
