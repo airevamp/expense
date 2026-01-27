@@ -100,7 +100,7 @@ export async function sasHandler(
     }
     const account = process.env["STORAGE_ACCOUNT_NAME"]!;
     const accountKey = process.env["STORAGE_ACCOUNT_KEY"]!;
-    const container = process.env["CONTAINER_NAME"] || "receipts";
+    const container = "receipts";
     const expiry = Number(process.env["SAS_EXPIRY_MINUTES"] || "5");
 
     if (!account || !accountKey || !container) {
