@@ -212,9 +212,16 @@ export async function deleteReceiptHandler(
 ): Promise<HttpResponseInit> {
   try {
     const queryBlobName = req.query.get("blobName");
-    const hasBody = req.headers.get("content-length") !== "0";
-    const body = hasBody ? ((await req.json()) as { blobName?: string }) : null;
-    const blobName = String(body?.blobName || queryBlobName || "").trim();
+    let bodyBlobName: string | undefined;
+    if (!queryBlobName) {
+      try {
+        const body = (await req.json()) as { blobName?: string };
+        bodyBlobName = body?.blobName;
+      } catch {
+        // Ignore parse errors when no body is sent.
+      }
+    }
+    const blobName = String(bodyBlobName || queryBlobName || "").trim();
     if (!blobName) {
       return { status: 400, jsonBody: { error: "blobName is required" } };
     }
