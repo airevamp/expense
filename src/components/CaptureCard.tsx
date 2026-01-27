@@ -19,7 +19,6 @@ import {
   buildBlobName,
   compressIfPossible,
   getSasUrl,
-  setBlobTags,
   ymd,
   toISO,
 } from "../lib/api";
@@ -78,19 +77,23 @@ export default function CaptureCard() {
         "x-user-id": userId,
       });
       setState("uploading");
+      const tagHeader = Object.entries(tags)
+        .map(
+          ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
+        )
+        .join("&");
       const uploadRes = await fetch(sas.uploadUrl, {
         method: "PUT",
         headers: {
           "Content-Type": prepared.type,
           "x-ms-blob-type": "BlockBlob",
+          "x-ms-tags": tagHeader,
         },
         body: prepared,
       });
       if (!uploadRes.ok) {
         throw new Error(`Upload failed: ${uploadRes.status}`);
       }
-      setState("tagging");
-      await setBlobTags(sas.uploadUrl, tags);
       setState("done");
       setMessage(sas.blobUrl);
     } catch (e: any) {

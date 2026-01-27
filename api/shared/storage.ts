@@ -33,7 +33,6 @@ export function buildBlobSasUrl(params: {
     new StorageSharedKeyCredential(account, accountKey),
   ).toString();
 
-  console.log("container", container, "blobName", blobName);
   const encodedPath = blobName
     .split("/")
     .map((segment) => encodeURIComponent(segment))
