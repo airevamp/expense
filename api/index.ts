@@ -4,6 +4,13 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
+import {
+  BlobSASPermissions,
+  BlobServiceClient,
+  SASProtocol,
+  StorageSharedKeyCredential,
+  generateBlobSASQueryParameters,
+} from "@azure/storage-blob";
 import { buildBlobSasUrl } from "./shared/storage.js";
 
 type CallerIdentity = {
@@ -125,9 +132,80 @@ export async function sasHandler(
   }
 }
 
+export async function receiptsHandler(
+  req: HttpRequest,
+  ctx: InvocationContext,
+): Promise<HttpResponseInit> {
+  try {
+    const caller = getCallerIdentity(req);
+    if (!caller?.teamId || !caller?.userId) {
+      return { status: 401, jsonBody: { error: "Unauthorized" } };
+    }
+
+    const account = process.env["STORAGE_ACCOUNT_NAME"]!;
+    const accountKey = process.env["STORAGE_ACCOUNT_KEY"]!;
+    const container = process.env["CONTAINER_NAME"] || "receipts";
+    const expiry = Number(process.env["SAS_EXPIRY_MINUTES"] || "5");
+
+    if (!account || !accountKey) {
+      return {
+        status: 500,
+        jsonBody: { error: "Storage credentials not configured" },
+      };
+    }
+
+    const credential = new StorageSharedKeyCredential(account, accountKey);
+    const service = new BlobServiceClient(
+      `https://${account}.blob.core.windows.net`,
+      credential,
+    );
+    const containerClient = service.getContainerClient(container);
+    const prefix = `org/${caller.teamId}/user/${caller.userId}/`;
+    const startsOn = new Date(Date.now() - 60 * 1000);
+    const expiresOn = new Date(Date.now() + expiry * 60 * 1000);
+
+    const items: Array<{ name: string; url: string }> = [];
+    for await (const blob of containerClient.listBlobsFlat({ prefix })) {
+      const blobName = blob.name;
+      const sas = generateBlobSASQueryParameters(
+        {
+          containerName: container,
+          blobName,
+          permissions: BlobSASPermissions.parse("r"),
+          startsOn,
+          expiresOn,
+          protocol: SASProtocol.Https,
+        },
+        credential,
+      ).toString();
+      const encodedPath = blobName
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+      const base = `https://${account}.blob.core.windows.net/${container}/${encodedPath}`;
+      items.push({
+        name: blobName.split("/").pop() ?? blobName,
+        url: `${base}?${sas}`,
+      });
+    }
+
+    return { status: 200, jsonBody: items };
+  } catch (err: any) {
+    ctx.error("receipts error", err);
+    return { status: 500, jsonBody: { error: err?.message ?? "server error" } };
+  }
+}
+
 app.http("getSas", {
   route: "sas",
   methods: ["POST"],
   authLevel: "anonymous",
   handler: sasHandler,
+});
+
+app.http("getReceipts", {
+  route: "receipts",
+  methods: ["GET"],
+  authLevel: "anonymous",
+  handler: receiptsHandler,
 });
