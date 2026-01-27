@@ -5,7 +5,25 @@ import { List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
 export default function Receipts() {
   const [items, setItems] = useState<{ name: string; url: string }[]>([]);
   useEffect(() => {
-    setItems([]); // TODO: fetch from /api/receipts
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const response = await fetch("/api/receipts", {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const data = (await response.json()) as {
+          name: string;
+          url: string;
+        }[];
+        setItems(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if ((error as { name?: string }).name !== "AbortError") {
+          setItems([]);
+        }
+      }
+    })();
+    return () => controller.abort();
   }, []);
 
   return (
