@@ -169,7 +169,11 @@ export async function receiptsHandler(
     const startsOn = new Date(Date.now() - 60 * 1000);
     const expiresOn = new Date(Date.now() + expiry * 60 * 1000);
 
-    const items: Array<{ name: string; url: string }> = [];
+    const items: Array<{
+      name: string;
+      url: string;
+      deleteUrl: string;
+    }> = [];
     for await (const blob of containerClient.listBlobsFlat({ prefix })) {
       const blobName = blob.name;
       const sas = generateBlobSASQueryParameters(
@@ -191,12 +195,69 @@ export async function receiptsHandler(
       items.push({
         name: blobName.split("/").pop() ?? blobName,
         url: `${base}?${sas}`,
+        deleteUrl: `/api/receipts?blobName=${encodeURIComponent(blobName)}`,
       });
     }
 
     return { status: 200, jsonBody: items };
   } catch (err: any) {
     ctx.error("receipts error", err);
+    return { status: 500, jsonBody: { error: err?.message ?? "server error" } };
+  }
+}
+
+export async function deleteReceiptHandler(
+  req: HttpRequest,
+  ctx: InvocationContext,
+): Promise<HttpResponseInit> {
+  try {
+    const queryBlobName = req.query.get("blobName");
+    const hasBody = req.headers.get("content-length") !== "0";
+    const body = hasBody ? ((await req.json()) as { blobName?: string }) : null;
+    const blobName = String(body?.blobName || queryBlobName || "").trim();
+    if (!blobName) {
+      return { status: 400, jsonBody: { error: "blobName is required" } };
+    }
+
+    const prefix = parseBlobNamePrefix(blobName);
+    if (!prefix) {
+      return { status: 400, jsonBody: { error: "Invalid blobName format" } };
+    }
+
+    const caller = getCallerIdentity(req);
+    if (!caller?.teamId || !caller?.userId) {
+      return { status: 401, jsonBody: { error: "Unauthorized" } };
+    }
+    if (caller.teamId !== prefix.teamId || caller.userId !== prefix.userId) {
+      return { status: 403, jsonBody: { error: "Forbidden" } };
+    }
+    const orgHeader = req.headers.get("x-org")?.trim();
+    if (orgHeader && prefix.org !== orgHeader) {
+      return { status: 403, jsonBody: { error: "Forbidden" } };
+    }
+
+    const account = process.env["STORAGE_ACCOUNT_NAME"]!;
+    const accountKey = process.env["STORAGE_ACCOUNT_KEY"]!;
+    const container = "receipts";
+
+    if (!account || !accountKey) {
+      return {
+        status: 500,
+        jsonBody: { error: "Storage credentials not configured" },
+      };
+    }
+
+    const credential = new StorageSharedKeyCredential(account, accountKey);
+    const service = new BlobServiceClient(
+      `https://${account}.blob.core.windows.net`,
+      credential,
+    );
+    const containerClient = service.getContainerClient(container);
+    const blobClient = containerClient.getBlobClient(blobName);
+    await blobClient.deleteIfExists();
+    return { status: 200, jsonBody: { ok: true } };
+  } catch (err: any) {
+    ctx.error("delete receipts error", err);
     return { status: 500, jsonBody: { error: err?.message ?? "server error" } };
   }
 }
@@ -213,4 +274,11 @@ app.http("getReceipts", {
   methods: ["GET"],
   authLevel: "anonymous",
   handler: receiptsHandler,
+});
+
+app.http("deleteReceipt", {
+  route: "receipts",
+  methods: ["DELETE"],
+  authLevel: "anonymous",
+  handler: deleteReceiptHandler,
 });

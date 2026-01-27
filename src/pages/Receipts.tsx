@@ -17,7 +17,9 @@ import { useUser } from "../lib/auth";
 
 // Placeholder; later call your API to list by blob index tags
 export default function Receipts() {
-  const [items, setItems] = useState<{ name: string; url: string }[]>([]);
+  const [items, setItems] = useState<
+    { name: string; url: string; deleteUrl: string }[]
+  >([]);
   const { user } = useUser();
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function Receipts() {
         const data = (await response.json()) as {
           name: string;
           url: string;
+          deleteUrl: string;
         }[];
         setItems(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -57,15 +60,32 @@ export default function Receipts() {
     [items],
   );
 
-  const onDelete = React.useCallback((url: string) => {
-    setDeleting((prev) => new Set(prev).add(url));
-    setItems((prev) => prev.filter((item) => item.url !== url));
-    setDeleting((prev) => {
-      const next = new Set(prev);
-      next.delete(url);
-      return next;
-    });
-  }, []);
+  const onDelete = React.useCallback(
+    async (row: { url: string; deleteUrl: string }) => {
+      setDeleting((prev) => new Set(prev).add(row.url));
+      try {
+        const res = await fetch(row.deleteUrl, {
+          method: "DELETE",
+          headers: {
+            ...getDevAuthHeaders({
+              org: user?.company,
+              teamId: user?.tenantId,
+              userId: user?.userId,
+            }),
+          },
+        });
+        if (!res.ok) return;
+        setItems((prev) => prev.filter((item) => item.url !== row.url));
+      } finally {
+        setDeleting((prev) => {
+          const next = new Set(prev);
+          next.delete(row.url);
+          return next;
+        });
+      }
+    },
+    [user?.company, user?.tenantId, user?.userId],
+  );
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -102,7 +122,7 @@ export default function Receipts() {
                   <IconButton
                     size="small"
                     aria-label="Delete"
-                    onClick={() => onDelete(row.url)}
+                    onClick={() => onDelete(row)}
                     disabled={deleting.has(row.url)}
                   >
                     <DeleteIcon fontSize="small" />
