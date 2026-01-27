@@ -1,20 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
-import type { AccountInfo } from "@azure/msal-browser";
 
 type AuthUser = {
   userId: string;
   userName?: string;
   tenantId?: string;
+  company?: string;
 };
 
-function pickAccount(accounts: AccountInfo[]) {
-  return accounts[0] ?? null;
+async function fetchTenantDisplayName(
+  accessToken: string,
+): Promise<string | null> {
+  const res = await fetch(
+    "https://graph.microsoft.com/v1.0/organization?$select=id,displayName,verifiedDomains",
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+  if (!res.ok) return null;
+  const data = (await res.json()) as {
+    value?: Array<{ displayName?: string }>;
+  };
+  return data.value?.[0]?.displayName ?? null;
 }
 
 export function useUser() {
-  const { instance, accounts, inProgress } = useMsal();
-  const account = useMemo(() => pickAccount(accounts), [accounts]);
+  const { instance, inProgress } = useMsal();
+  const account = instance.getActiveAccount();
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
@@ -26,17 +38,34 @@ export function useUser() {
     const claims: any = account.idTokenClaims ?? {};
     const tenantId: string | undefined = claims.tid;
     const objectId: string | undefined = claims.oid;
-
     setUser({
       userId: objectId ?? account.homeAccountId,
       userName: claims.name ?? claims.preferred_username ?? account.username,
       tenantId,
     });
-  }, [account]);
+
+    let active = true;
+    (async () => {
+      try {
+        const result = await instance.acquireTokenSilent({
+          scopes: ["User.Read"],
+          account,
+        });
+        const tenantName = await fetchTenantDisplayName(result.accessToken);
+        if (!tenantName || !active) return;
+        setUser((prev) => (prev ? { ...prev, company: tenantName } : prev));
+      } catch {
+        // Ignore graph errors; company remains unset.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [account, instance]);
 
   const login = () =>
     instance.loginRedirect({
-      scopes: ["openid", "profile", "email"],
+      scopes: ["openid", "profile", "email", "User.Read"],
       prompt: "select_account",
     });
 

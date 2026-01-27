@@ -22,10 +22,10 @@ function parseBlobNamePrefix(blobName: string) {
   const parts = blobName.split("/");
   if (parts.length < 8) return null;
   const [orgMarker, teamId, userMarker, userId, y, m, d] = parts;
-  if (orgMarker !== "org" || userMarker !== "user") return null;
+  if (!orgMarker || userMarker !== "user") return null;
   if (!teamId || !userId) return null;
   if (!isValidDateParts(y, m, d)) return null;
-  return { teamId, userId, y, m, d };
+  return { org: orgMarker, teamId, userId, y, m, d };
 }
 
 function isValidDateParts(y: string, m: string, d: string) {
@@ -98,6 +98,10 @@ export async function sasHandler(
     if (!prefix) {
       return { status: 400, jsonBody: { error: "Invalid blobName format" } };
     }
+    const orgHeader = req.headers.get("x-org")?.trim();
+    if (orgHeader && prefix.org !== orgHeader) {
+      return { status: 403, jsonBody: { error: "Forbidden" } };
+    }
     const caller = getCallerIdentity(req);
     if (!caller?.teamId || !caller?.userId) {
       return { status: 401, jsonBody: { error: "Unauthorized" } };
@@ -144,7 +148,7 @@ export async function receiptsHandler(
 
     const account = process.env["STORAGE_ACCOUNT_NAME"]!;
     const accountKey = process.env["STORAGE_ACCOUNT_KEY"]!;
-    const container = process.env["CONTAINER_NAME"] || "receipts";
+    const container = "receipts";
     const expiry = Number(process.env["SAS_EXPIRY_MINUTES"] || "5");
 
     if (!account || !accountKey) {
@@ -160,7 +164,8 @@ export async function receiptsHandler(
       credential,
     );
     const containerClient = service.getContainerClient(container);
-    const prefix = `org/${caller.teamId}/user/${caller.userId}/`;
+    const org = req.headers.get("x-org")?.trim() || "org";
+    const prefix = `${org}/${caller.teamId}/user/${caller.userId}/`;
     const startsOn = new Date(Date.now() - 60 * 1000);
     const expiresOn = new Date(Date.now() + expiry * 60 * 1000);
 

@@ -6,7 +6,6 @@ import {
   Typography,
   Paper,
   Stack,
-  Chip,
   Button,
   LinearProgress,
   Alert,
@@ -19,9 +18,10 @@ import {
   buildBlobName,
   compressIfPossible,
   getSasUrl,
+  getDevAuthHeaders,
   ymd,
-  toISO,
 } from "../lib/api";
+import { useUser } from "../lib/auth";
 
 export default function CaptureCard() {
   const [file, setFile] = useState<File | null>(null);
@@ -31,9 +31,7 @@ export default function CaptureCard() {
     "idle" | "prepping" | "uploading" | "tagging" | "done" | "error"
   >("idle");
   const [message, setMessage] = useState("");
-
-  const teamId = "acme";
-  const userId = "user-123";
+  const { user } = useUser();
 
   useEffect(() => {
     if (!file) return setPreview(null);
@@ -62,7 +60,15 @@ export default function CaptureCard() {
       const ext = prepared.type.includes("png") ? "png" : "jpg";
       const now = new Date();
       const { y, m } = ymd(now);
+      const headers = getDevAuthHeaders({
+        org: user?.company,
+        teamId: user?.tenantId,
+        userId: user?.userId,
+      });
+      const teamId = headers["x-team-id"] || "acme";
+      const userId = headers["x-user-id"] || "user-123";
       const blobName = buildBlobName({
+        org: headers["x-org"],
         teamId,
         userId,
         source: "iphone",
@@ -72,10 +78,7 @@ export default function CaptureCard() {
 
       const tags = { teamId, userId, year: String(y), month: String(m) };
 
-      const sas = await getSasUrl(blobName, prepared.type, {
-        "x-team-id": teamId,
-        "x-user-id": userId,
-      });
+      const sas = await getSasUrl(blobName, prepared.type, headers);
       setState("uploading");
       const tagHeader = Object.entries(tags)
         .map(
@@ -100,7 +103,7 @@ export default function CaptureCard() {
       setState("error");
       setMessage(e?.message ?? "Upload error");
     }
-  }, [file, notes]);
+  }, [file, notes, user?.company, user?.tenantId, user?.userId]);
 
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 2 }}>

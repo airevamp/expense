@@ -20,6 +20,24 @@ export async function getSasUrl(
   return res.json();
 }
 
+export function getDevAuthHeaders(overrides?: {
+  org?: string;
+  teamId?: string;
+  userId?: string;
+}) {
+  const org = import.meta.env.VITE_ORG as string | undefined;
+  const teamId = import.meta.env.VITE_TEAM_ID as string | undefined;
+  const userId = import.meta.env.VITE_USER_ID as string | undefined;
+  const headers: Record<string, string> = {};
+  const orgValue = overrides?.org ?? org;
+  const teamValue = overrides?.teamId ?? teamId;
+  const userValue = overrides?.userId ?? userId;
+  if (orgValue) headers["x-org"] = orgValue;
+  if (teamValue) headers["x-team-id"] = teamValue;
+  if (userValue) headers["x-user-id"] = userValue;
+  return headers;
+}
+
 export function toISO(d: Date) {
   return d.toISOString();
 }
@@ -32,6 +50,7 @@ export function ymd(d: Date) {
 }
 
 export function buildBlobName(params: {
+  org?: string;
   teamId: string;
   userId: string;
   source: "iphone" | "android" | "web";
@@ -41,7 +60,8 @@ export function buildBlobName(params: {
   const now = params.now ?? new Date();
   const { y, m, day } = ymd(now);
   const uuid = crypto.randomUUID();
-  return `org/${params.teamId}/user/${params.userId}/${y}/${m}/${day}/${uuid}-${params.source}.${params.ext}`;
+  const org = params.org?.trim() || "org";
+  return `${org}/${params.teamId}/user/${params.userId}/${y}/${m}/${day}/${uuid}-${params.source}.${params.ext}`;
 }
 
 export async function compressIfPossible(

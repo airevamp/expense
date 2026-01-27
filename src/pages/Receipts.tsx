@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
+import { getDevAuthHeaders } from "../lib/api";
+import { useUser } from "../lib/auth";
 
 // Placeholder; later call your API to list by blob index tags
 export default function Receipts() {
   const [items, setItems] = useState<{ name: string; url: string }[]>([]);
+  const { user } = useUser();
   useEffect(() => {
     const controller = new AbortController();
     void (async () => {
       try {
         const response = await fetch("/api/receipts", {
           signal: controller.signal,
+          headers: getDevAuthHeaders({
+            org: user?.company,
+            teamId: user?.tenantId,
+            userId: user?.userId,
+          }),
         });
         if (!response.ok) return;
         const data = (await response.json()) as {
@@ -24,7 +32,7 @@ export default function Receipts() {
       }
     })();
     return () => controller.abort();
-  }, []);
+  }, [user?.company, user?.tenantId, user?.userId]);
 
   return (
     <Paper sx={{ p: 2 }}>
