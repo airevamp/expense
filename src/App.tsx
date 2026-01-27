@@ -46,51 +46,54 @@ export default function App() {
   );
 
   useEffect(() => {
+    const splash = document.getElementById("boot-splash");
+    if (!splash) return;
+
+    const shownKey = "bootSplashShown";
+    const alreadyShown = sessionStorage.getItem(shownKey) === "true";
+    if (alreadyShown) {
+      splash.remove();
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+      return;
+    }
+
+    sessionStorage.setItem(shownKey, "true");
     const isPwa =
       window.matchMedia?.("(display-mode: standalone)")?.matches ||
       (window.navigator as any)?.standalone === true;
-
-    if (!isPwa) return;
+    if (!isPwa) {
+      splash.remove();
+      return;
+    }
 
     const MIN_VISIBLE_TIME = 2000;
     const FADE_DURATION = 900;
     const startTime = performance.now();
 
     const removeSplash = () => {
-      const splash = document.getElementById("boot-splash");
-      if (!splash) return;
-
       const logo = splash.querySelector(".boot-logo") as HTMLElement | null;
       if (!logo) {
         splash.remove();
         return;
       }
 
-      // Keep the background visible (don’t fade splash yet)
       splash.style.opacity = "1";
-
-      // Prep logo animation
       logo.style.willChange = "transform, opacity";
       logo.style.transformOrigin = "center";
       logo.style.transition = `transform ${FADE_DURATION}ms ease, opacity ${FADE_DURATION}ms ease`;
-
-      // Ensure a real start state
       logo.style.transform = "scale(1)";
       logo.style.opacity = "1";
 
-      // Force reflow (iOS sometimes needs this for transforms to animate)
       void logo.getBoundingClientRect();
-
-      // Animate next frame
       requestAnimationFrame(() => {
         logo.style.transform = "scale(1.18)";
         logo.style.opacity = "0";
       });
 
-      // Remove splash after animation finishes
       setTimeout(() => {
         splash.remove();
-
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
         document.body.style.height = "";
