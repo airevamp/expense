@@ -157,7 +157,12 @@ export default function CaptureCard() {
         <Button
           variant="contained"
           startIcon={<UploadIcon />}
-          disabled={!file || state === "uploading" || state === "tagging"}
+          disabled={
+            !file ||
+            state === "prepping" ||
+            state === "uploading" ||
+            state === "tagging"
+          }
           onClick={upload}
           fullWidth
           size="large"
