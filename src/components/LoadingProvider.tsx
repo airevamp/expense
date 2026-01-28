@@ -12,13 +12,14 @@ const LoadingContext = React.createContext<LoadingContextValue | null>(null);
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [count, setCount] = React.useState(0);
 
+  const start = React.useCallback(() => setCount((c) => c + 1), []);
+  const stop = React.useCallback(
+    () => setCount((c) => Math.max(0, c - 1)),
+    [],
+  );
   const value = React.useMemo(
-    () => ({
-      start: () => setCount((c) => c + 1),
-      stop: () => setCount((c) => Math.max(0, c - 1)),
-      isLoading: count > 0,
-    }),
-    [count],
+    () => ({ start, stop, isLoading: count > 0 }),
+    [start, stop, count],
   );
 
   return (
