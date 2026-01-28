@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
+import { useLoading } from "../components/LoadingProvider";
 
 type AuthUser = {
   userId: string;
@@ -36,6 +37,7 @@ export function useUser() {
   const account = instance.getActiveAccount();
   const accountId = account?.homeAccountId;
   const [user, setUser] = useState<AuthUser | null>(null);
+  const { start, stop } = useLoading();
 
   useEffect(() => {
     const currentAccount = instance.getActiveAccount();
@@ -75,6 +77,7 @@ export function useUser() {
     if (!inflight) {
       inflight = (async () => {
         try {
+          start();
           const result = await instance.acquireTokenSilent({
             scopes: ["User.Read"],
             account: currentAccount,
@@ -82,6 +85,8 @@ export function useUser() {
           return await fetchTenantDisplayName(result.accessToken);
         } catch {
           return null;
+        } finally {
+          stop();
         }
       })();
       tenantNamePromise.set(cacheKey, inflight);
@@ -100,7 +105,7 @@ export function useUser() {
     return () => {
       active = false;
     };
-  }, [accountId, instance]);
+  }, [accountId, instance, start, stop]);
 
   const login = (redirectStartPage?: string) =>
     instance.loginRedirect({

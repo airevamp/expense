@@ -22,6 +22,7 @@ import {
   ymd,
 } from "../lib/api";
 import { useUser } from "../lib/auth";
+import { useLoading } from "./LoadingProvider";
 
 export default function CaptureCard() {
   const [file, setFile] = useState<File | null>(null);
@@ -32,6 +33,7 @@ export default function CaptureCard() {
   >("idle");
   const [message, setMessage] = useState("");
   const { user } = useUser();
+  const { start, stop } = useLoading();
 
   useEffect(() => {
     if (!file) return setPreview(null);
@@ -54,6 +56,7 @@ export default function CaptureCard() {
 
   const upload = useCallback(async () => {
     if (!file) return;
+    start();
     try {
       setState("prepping");
       const prepared = await compressIfPossible(file);
@@ -102,8 +105,10 @@ export default function CaptureCard() {
     } catch (e: any) {
       setState("error");
       setMessage(e?.message ?? "Upload error");
+    } finally {
+      stop();
     }
-  }, [file, notes, user?.company, user?.tenantId, user?.userId]);
+  }, [file, notes, user?.company, user?.tenantId, user?.userId, start, stop]);
 
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 2 }}>

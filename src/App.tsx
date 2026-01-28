@@ -15,6 +15,7 @@ import { useRoutes, Link as RouterLink } from "react-router-dom";
 import { routes } from "./routes";
 import { AccountCircle } from "@mui/icons-material";
 import { useUser } from "./lib/auth";
+import { GlobalLoading } from "./components/LoadingProvider";
 
 export default function App() {
   const element = useRoutes(routes);
@@ -114,6 +115,7 @@ export default function App() {
 
   return (
     <>
+      <GlobalLoading />
       <AppBar position="sticky" elevation={0}>
         <Toolbar
           sx={{

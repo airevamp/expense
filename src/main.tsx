@@ -6,6 +6,7 @@ import { MsalProvider } from "@azure/msal-react";
 import { PublicClientApplication } from "@azure/msal-browser";
 import App from "./App";
 import theme from "./theme";
+import { LoadingProvider } from "./components/LoadingProvider";
 
 const msalInstance = new PublicClientApplication({
   auth: {
@@ -35,12 +36,14 @@ const msalInstance = new PublicClientApplication({
 
   createRoot(document.getElementById("root")!).render(
     <MsalProvider instance={msalInstance}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ThemeProvider>
+      <LoadingProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ThemeProvider>
+      </LoadingProvider>
     </MsalProvider>,
   );
 })();

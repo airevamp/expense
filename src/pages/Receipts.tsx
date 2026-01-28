@@ -14,6 +14,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getDevAuthHeaders } from "../lib/api";
 import { useUser } from "../lib/auth";
+import { useLoading } from "../components/LoadingProvider";
 
 // Placeholder; later call your API to list by blob index tags
 export default function Receipts() {
@@ -22,9 +23,11 @@ export default function Receipts() {
   >([]);
   const { user } = useUser();
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
+  const { start, stop } = useLoading();
   useEffect(() => {
     const controller = new AbortController();
     void (async () => {
+      start();
       try {
         const response = await fetch("/api/receipts", {
           signal: controller.signal,
@@ -45,10 +48,12 @@ export default function Receipts() {
         if ((error as { name?: string }).name !== "AbortError") {
           setItems([]);
         }
+      } finally {
+        stop();
       }
     })();
     return () => controller.abort();
-  }, [user?.company, user?.tenantId, user?.userId]);
+  }, [user?.company, user?.tenantId, user?.userId, start, stop]);
 
   const rows = useMemo(
     () =>
@@ -63,6 +68,7 @@ export default function Receipts() {
   const onDelete = React.useCallback(
     async (row: { url: string; deleteUrl: string }) => {
       setDeleting((prev) => new Set(prev).add(row.url));
+      start();
       try {
         const res = await fetch(row.deleteUrl, {
           method: "DELETE",
@@ -77,6 +83,7 @@ export default function Receipts() {
         if (!res.ok) return;
         setItems((prev) => prev.filter((item) => item.url !== row.url));
       } finally {
+        stop();
         setDeleting((prev) => {
           const next = new Set(prev);
           next.delete(row.url);
@@ -84,7 +91,7 @@ export default function Receipts() {
         });
       }
     },
-    [user?.company, user?.tenantId, user?.userId],
+    [user?.company, user?.tenantId, user?.userId, start, stop],
   );
 
   return (
