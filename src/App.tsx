@@ -113,6 +113,12 @@ export default function App() {
     logoutMsal();
   }, [logoutMsal]);
 
+  useEffect(() => {
+    if (!user?.userId) return;
+    const timeoutId = window.setTimeout(() => logoutMsal(), 10 * 60 * 1000);
+    return () => window.clearTimeout(timeoutId);
+  }, [user?.userId, logoutMsal]);
+
   return (
     <>
       <GlobalLoading />

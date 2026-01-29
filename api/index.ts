@@ -44,12 +44,6 @@ function isValidDateParts(y: string, m: string, d: string) {
 }
 
 function getCallerIdentity(req: HttpRequest): CallerIdentity | null {
-  const teamHeader = req.headers.get("x-team-id")?.trim();
-  const userHeader = req.headers.get("x-user-id")?.trim();
-  if (teamHeader || userHeader) {
-    return { teamId: teamHeader, userId: userHeader };
-  }
-
   const principal = req.headers.get("x-ms-client-principal");
   if (!principal) return null;
   try {

@@ -56,6 +56,11 @@ export default function CaptureCard() {
 
   const upload = useCallback(async () => {
     if (!file) return;
+    if (!user?.tenantId || !user?.userId) {
+      setState("error");
+      setMessage("Missing user identity. Please sign in again.");
+      return;
+    }
     start();
     try {
       setState("prepping");
@@ -68,8 +73,8 @@ export default function CaptureCard() {
         teamId: user?.tenantId,
         userId: user?.userId,
       });
-      const teamId = headers["x-team-id"] || "acme";
-      const userId = headers["x-user-id"] || "user-123";
+      const teamId = user.tenantId;
+      const userId = user.userId;
       const blobName = buildBlobName({
         org: headers["x-org"],
         teamId,

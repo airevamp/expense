@@ -8,7 +8,11 @@ self.addEventListener("install", (event: any) => {
 });
 self.addEventListener("fetch", (event: any) => {
   const req = event.request;
-  if (req.method === "GET" && new URL(req.url).origin === location.origin) {
+  if (req.method === "GET") {
+    const url = new URL(req.url);
+    if (url.origin !== location.origin || url.pathname.startsWith("/api/")) {
+      return;
+    }
     event.respondWith(caches.match(req).then((cached) => cached || fetch(req)));
   }
 });
