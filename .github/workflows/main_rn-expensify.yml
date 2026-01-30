@@ -27,17 +27,20 @@ jobs:
           pushd './api'
           npm ci
           npm run build
+          # Remove devDependencies to keep the package small
+          npm prune --production
           popd
 
-      # This step saves the built files so the 'deploy' job can see them
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: |
-            ./api
-            !./api/**/*.ts
-            !./api/tsconfig.json
+            api/dist
+            api/package.json
+            api/host.json
+            api/node_modules
+            !api/**/*.ts
 
   deploy:
     runs-on: ubuntu-latest
@@ -66,6 +69,5 @@ jobs:
           app-name: "rn-expensify"
           slot-name: "Production"
           package: "./api"
-          # Since we built the code in GitHub, we disable remote building
           scm-do-build-during-deployment: false
           enable-oryx-build: false
