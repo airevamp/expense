@@ -2,10 +2,9 @@
   "name": "receipt-swa-api",
   "version": "0.1.0",
   "private": true,
-  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc -p . && cpy \"host.json\" dist/ && cpy \"package.json\" dist/",
+    "build": "tsc -p .",
     "start": "func start",
     "clean": "rimraf dist"
   },
