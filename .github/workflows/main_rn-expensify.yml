@@ -10,7 +10,6 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'api/dist' # Functions build output
   NODE_VERSION: '20.x'
 
 jobs:
@@ -41,6 +40,10 @@ jobs:
         run: |
           cd ./api/dist
           zip ../../release.zip ./* -r
+      - name: Verify Functions build output
+        run: |
+          test -f api/dist/host.json
+          test -f api/dist/package.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -61,11 +64,6 @@ jobs:
         with:
           name: node-app
 
-      - name: Unzip artifact for deployment
-        run: |
-          unzip release.zip
-          rm release.zip
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -79,5 +77,5 @@ jobs:
         with:
           app-name: 'rn-expensify'
           slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: release.zip
           
