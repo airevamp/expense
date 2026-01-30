@@ -36,8 +36,6 @@ jobs:
           app_location: "/" # App source code path
           output_location: "dist" # Frontend build output (Vite)
 
-          # API build config
-          api_location: "api" # Deploy the built Functions app
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

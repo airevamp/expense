@@ -31,11 +31,13 @@ export default function Receipts() {
       try {
         const response = await fetch("/api/receipts", {
           signal: controller.signal,
-          headers: getDevAuthHeaders({
-            org: user?.company,
-            teamId: user?.tenantId,
-            userId: user?.userId,
-          }),
+          headers: {
+            ...getDevAuthHeaders({
+              org: user?.company,
+              teamId: user?.tenantId,
+              userId: user?.userId,
+            }),
+          },
         });
         if (!response.ok) return;
         const data = (await response.json()) as {

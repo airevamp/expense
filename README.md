@@ -31,6 +31,7 @@ STORAGE_ACCOUNT_NAME=your-storage-account
 STORAGE_ACCOUNT_KEY=your-storage-key
 CONTAINER_NAME=receipts # optional, defaults to "receipts"
 SAS_EXPIRY_MINUTES=5
+ALLOW_SWA_AUTH=true # required for SWA client-principal auth
 ```
 
 To build the API:
@@ -65,7 +66,7 @@ Returns:
 ```
 
 ### `DELETE /api/receipts?blobName=...`
-Deletes the blob (requires platform-provided auth; headers are ignored for auth).
+Deletes the blob (requires SWA auth; `x-ms-client-principal` must be present).
 
 ## PWA splash
 The splash screen shows once per session (PWA only). A session flag prevents it from reappearing after login redirects.

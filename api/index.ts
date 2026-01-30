@@ -44,6 +44,8 @@ function isValidDateParts(y: string, m: string, d: string) {
 }
 
 function getCallerIdentity(req: HttpRequest): CallerIdentity | null {
+  // Prefer access token if present.
+  // Falls back to SWA client principal for local/proxy scenarios.
   const principal = req.headers.get("x-ms-client-principal");
   if (!principal) return null;
   try {
